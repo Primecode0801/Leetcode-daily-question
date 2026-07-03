@@ -1,0 +1,86 @@
+import java.util.*;
+
+public class Solution {
+    public int findMaxPathScore(int[][] edges, boolean[] online, long k) {
+        int n = online.length;
+        
+        // 1. Build adjacency list representation of the graph
+        List<List<int[]>> adj = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            adj.add(new ArrayList<>());
+        }
+        
+        int minW = Integer.MAX_VALUE;
+        int maxW = Integer.MIN_VALUE;
+        
+        for (int[] edge : edges) {
+            int u = edge[0];
+            int v = edge[1];
+            int w = edge[2];
+            adj.get(u).add(new int[]{v, w});
+            minW = Math.min(minW, w);
+            maxW = Math.max(maxW, w);
+        }
+        
+        if (minW > maxW) {
+            return -1;
+        }
+
+        // 2. Binary search on the answer (the maximum possible minimum-edge cost)
+        int low = minW;
+        int high = maxW;
+        int ans = -1;
+        
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (canReach(n, adj, online, k, mid)) {
+                ans = mid;         // Found a valid path, try to maximize the score
+                low = mid + 1;
+            } else {
+                high = mid - 1;    // Path not possible, lower the threshold
+            }
+        }
+        
+        return ans;
+    }
+
+    // 3. Dijkstra's algorithm to check if a valid path exists with total cost <= k
+    private boolean canReach(int n, List<List<int[]>> adj, boolean[] online, long k, int target) {
+        long[] dist = new long[n];
+        Arrays.fill(dist, Long.MAX_VALUE);
+        dist[0] = 0L;
+        
+        // Priority Queue tracks state as array: [node_id, cost_so_far]
+        // Sorted ascendingly by cumulative path cost (index 1)
+        PriorityQueue<long[]> pq = new PriorityQueue<>((a, b) -> Long.compare(a[1], b[1]));
+        pq.offer(new long[]{0L, 0L});
+        
+        while (!pq.isEmpty()) {
+            long[] current = pq.poll();
+            int u = (int) current[0];
+            long cost = current[1];
+            
+            if (cost > dist[u]) {
+                continue;
+            }
+            if (u == n - 1) {
+                return cost <= k;
+            }
+            
+            for (int[] edge : adj.get(u)) {
+                int v = edge[0];
+                int w = edge[1];
+                
+                // Conditions: edge cost >= target score AND target node must be online
+                if (w >= target && online[v]) {
+                    if (cost + w < dist[v]) {
+                        dist[v] = cost + w;
+                        pq.offer(new long[]{(long) v, dist[v]});
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+}
