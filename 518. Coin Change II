@@ -1,0 +1,31 @@
+class Solution {
+    private Integer[][] dp;
+
+    public int change(int amount, int[] coins) {
+        dp = new Integer[coins.length][amount + 1];
+        return solve(0, amount, coins);
+    }
+
+    private int solve(int idx, int amount, int[] coins) {
+        if (amount == 0) {
+            return 1;
+        }
+
+        if (idx == coins.length || amount < 0) {
+            return 0;
+        }
+
+        if (dp[idx][amount] != null) {
+            return dp[idx][amount];
+        }
+
+        int take = 0;
+        if (coins[idx] <= amount) {
+            take = solve(idx, amount - coins[idx], coins);
+        }
+
+        int skip = solve(idx + 1, amount, coins);
+
+        return dp[idx][amount] = take + skip;
+    }
+}
