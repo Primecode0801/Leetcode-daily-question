@@ -1,0 +1,30 @@
+class Solution {
+    /**
+     * Finds the smallest index i where the sum of digits of nums[i] equals i.
+     * 
+     * @param nums the input array of non-negative integers
+     * @return the smallest valid index, or -1 if no such index exists
+     */
+    public int smallestIndex(int[] nums) {
+        // Iterate through each index in the array
+        for (int i = 0; i < nums.length; ++i) {
+            // Calculate the sum of digits for the current number
+            int digitSum = 0;
+            int currentNumber = nums[i];
+          
+            // Extract and sum each digit of the current number
+            while (currentNumber != 0) {
+                digitSum += currentNumber % 10;  // Add the last digit to sum
+                currentNumber /= 10;              // Remove the last digit
+            }
+          
+            // Check if the digit sum equals the current index
+            if (digitSum % 10 == i % 10) {
+                return i;  // Return the first valid index found
+            }
+        }
+      
+        // No valid index found
+        return -1;
+    }
+}
