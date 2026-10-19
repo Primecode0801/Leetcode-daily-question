@@ -1,0 +1,56 @@
+class Solution {
+    public long largestEvenSum(int[] nums, int k) {
+        // Sort array in ascending order
+        Arrays.sort(nums);
+
+        // Calculate sum of k largest elements
+        long sum = 0;
+        int n = nums.length;
+        for (int i = 0; i < k; ++i) {
+            sum += nums[n - i - 1];
+        }
+
+        // If sum is already even, return it
+        if (sum % 2 == 0) {
+            return sum;
+        }
+
+        // Sum is odd, need to swap one element to make it even
+        // To make odd sum even: replace odd with even or even with odd
+
+        final int INF = 1 << 29;
+
+        // Find largest odd and even numbers from unused elements (first n-k elements)
+        int largestUnusedOdd = -INF;
+        int largestUnusedEven = -INF;
+        for (int i = 0; i < n - k; ++i) {
+            if (nums[i] % 2 == 1) {
+                largestUnusedOdd = nums[i];
+            } else {
+                largestUnusedEven = nums[i];
+            }
+        }
+
+        // Find smallest odd and even numbers from selected elements (last k elements)
+        int smallestSelectedOdd = INF;
+        int smallestSelectedEven = INF;
+        for (int i = n - 1; i >= n - k; --i) {
+            if (nums[i] % 2 == 1) {
+                smallestSelectedOdd = nums[i];
+            } else {
+                smallestSelectedEven = nums[i];
+            }
+        }
+
+        // Try two swapping strategies:
+        // 1. Replace smallest selected even with largest unused odd
+        // 2. Replace smallest selected odd with largest unused even
+        long maxEvenSum = Math.max(
+            sum - smallestSelectedEven + largestUnusedOdd,
+            sum - smallestSelectedOdd + largestUnusedEven
+        );
+
+        // Return -1 if no valid even sum exists
+        return maxEvenSum < 0 ? -1 : maxEvenSum;
+    }
+}
