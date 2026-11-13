@@ -1,0 +1,43 @@
+import java.util.ArrayDeque;
+import java.util.Deque;
+
+class Solution {
+    public long countNonDecreasingSubarrays(int[] nums, int k) {
+        int n = nums.length;
+        long ans = 0;
+        long cost = 0;
+        int right = n - 1;
+        
+        // Stores pairs of {value, count_of_elements_clamped_to_this_value}
+        Deque<long[]> dq = new ArrayDeque<>();
+
+        for (int left = n - 1; left >= 0; left--) {
+            long curr = nums[left];
+            long count = 1;
+
+            // Merge smaller elements into the new running maximum
+            while (!dq.isEmpty() && dq.peekFirst()[0] <= curr) {
+                long[] front = dq.pollFirst();
+                cost += (curr - front[0]) * front[1];
+                count += front[1];
+            }
+
+            dq.addFirst(new long[]{curr, count});
+
+            // Shrink window from the right until cost <= k
+            while (cost > k) {
+                long[] back = dq.peekLast();
+                cost -= (back[0] - nums[right]);
+                back[1]--;
+                if (back[1] == 0) {
+                    dq.pollLast();
+                }
+                right--;
+            }
+
+            ans += (right - left + 1);
+        }
+
+        return ans;
+    }
+}
